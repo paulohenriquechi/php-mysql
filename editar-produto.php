@@ -1,3 +1,34 @@
+<?php
+require 'src/connection.php';
+require 'src/model/Product.php';
+require 'src/repository/ProductRepository.php';
+
+$repository = new ProductRepository($pdo);
+
+if (isset($_POST['editar'])) {
+  $product = new Product(
+    $_POST['id'],
+    $_POST['tipo'],
+    $_POST['nome'],
+    $_POST['descricao'],
+    $_POST['preco'],
+    $_POST['imagem']
+  );
+
+  if ($_FILES['imagem']['error'] == UPLOAD_ERR_OK){
+    $product->setImage(uniqid() . $_FILES['imagem']['name']);
+    move_uploaded_file($_FILES['imagem']['tmp_name'], $produto->getDisplayImage());
+  }
+  
+  $repository->editProduct($product);
+  header('Location: admin.php');
+} else {
+  $id = $_GET['id'];
+  $product = $repository->getProduct($id);
+}
+
+?>
+
 <!doctype html>
 <html lang="pt-br">
 <head>
@@ -24,27 +55,28 @@
     <img class= "ornaments" src="img/ornaments-coffee.png" alt="ornaments">
   </section>
   <section class="container-form">
-    <form action="#">
+    <form method="post">
+      <input type="hidden" name="id" value="<?=$product->getId()?>">
 
       <label for="nome">Nome</label>
-      <input type="text" id="nome" name="nome" placeholder="Digite o nome do produto" required>
+      <input type="text" id="nome" name="nome" placeholder="Digite o nome do produto" value="<?=$product->getName()?>" required>
 
       <div class="container-radio">
         <div>
             <label for="cafe">Café</label>
-            <input type="radio" id="cafe" name="tipo" value="Café" checked>
+            <input type="radio" id="cafe" name="tipo" value="Cafe" <?=$product->getType() == 'Cafe' ? 'checked' : '' ?>>
         </div>
         <div>
             <label for="almoco">Almoço</label>
-            <input type="radio" id="almoco" name="tipo" value="Almoço">
+            <input type="radio" id="almoco" name="tipo" value="Almoco" <?=$product->getType() == 'Almoco' ? 'checked' : '' ?>>
         </div>
     </div>
 
       <label for="descricao">Descrição</label>
-      <input type="text" id="descricao" name="descricao" placeholder="Digite uma descrição" required>
+      <input type="text" id="descricao" name="descricao" placeholder="Digite uma descrição" value="<?=$product->getDescription()?>" required>
 
       <label for="preco">Preço</label>
-      <input type="text" id="preco" name="preco" placeholder="Digite uma descrição" required>
+      <input type="text" id="preco" name="preco" placeholder="Digite um preço" value="<?=$product->getFormattedPrice()?>" required>
 
       <label for="imagem">Envie uma imagem do produto</label>
       <input type="file" name="imagem" accept="image/*" id="imagem" placeholder="Envie uma imagem">

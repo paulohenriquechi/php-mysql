@@ -1,3 +1,32 @@
+<?php
+
+require 'src/connection.php';
+require 'src/model/Product.php';
+require 'src/repository/ProductRepository.php';
+
+if (isset($_POST['cadastro'])) {
+    $product = new Product(
+        null,
+        $_POST['tipo'],
+        $_POST['nome'],
+        $_POST['descricao'],
+        $_POST['preco']
+    );
+
+    if (isset($_FILES['imagem'])) {
+        var_dump($_FILES['imagem']);
+        $product->setImage(uniqid().$_FILES['imagem']['name']);
+        move_uploaded_file($_FILES['imagem']['tmp_name'], $product->getDisplayImage());
+    }
+
+    $repository = new ProductRepository($pdo);
+    $repository->createProduct($product);
+
+    header('Location: admin.php');
+}
+
+?>
+
 <!doctype html>
 <html lang="pt-br">
 <head>
@@ -24,18 +53,18 @@
         <img class= "ornaments" src="img/ornaments-coffee.png" alt="ornaments">
     </section>
     <section class="container-form">
-        <form action="#">
+        <form method="post" enctype="multipart/form-data">
 
             <label for="nome">Nome</label>
             <input type="text" id="nome" name="nome" placeholder="Digite o nome do produto" required>
             <div class="container-radio">
                 <div>
                     <label for="cafe">Café</label>
-                    <input type="radio" id="cafe" name="tipo" value="Café" checked>
+                    <input type="radio" id="cafe" name="tipo" value="Cafe" checked>
                 </div>
                 <div>
                     <label for="almoco">Almoço</label>
-                    <input type="radio" id="almoco" name="tipo" value="Almoço">
+                    <input type="radio" id="almoco" name="tipo" value="Almoco">
                 </div>
             </div>
             <label for="descricao">Descrição</label>
